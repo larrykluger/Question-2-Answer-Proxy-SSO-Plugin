@@ -75,7 +75,7 @@
    If you use "External_Users" authentication, then you should leave
    regular authentication on since External Users replaces regular
    authentication. */
-   define ('QA_ENABLE_REG_AUTH', false);
+   define ('QA_ENABLE_REG_AUTH', true);
 
 
 /*
