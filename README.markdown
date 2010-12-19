@@ -4,7 +4,7 @@ This project is the **Proxy SSO Plugin** for the [Question 2 Answer](http://www.
 
 **Tested with Question 2 Answer ver. 1.3**
 
-**[Screencast demonstration of Proxy SSO Plugin User Interaction](http://marketing.masteragenda.com/screencasts/q2a_proxy_sso_demo/index.html)** 
+**[Screencast demonstration of Proxy SSO Plugin User Interaction](http://marketing.masteragenda.com/screencasts/Q2A_proxy_sso_demo/index.html)** 
 
 Note that the screencast is large, and may take several minutes to load. Thank you.
 
@@ -16,7 +16,7 @@ Question 2 Answer (Q2A) includes multiple user authentication techniques. Some c
 * *Facebook Connect Plugin.* Q2A includes a plugin that will authenticate the user with Facebook using the Facebook connect technology. Facebook Connect can be used with the built-in authentication support.
 * The *Proxy SSO Plugin* (this project) enables an external *authentication website* to manage the user registration and signin functions for Q2A.
 
-**[Screencast demonstration of Proxy SSO Plugin User Interaction](http://marketing.masteragenda.com/screencasts/q2a_proxy_sso_demo/index.html)** 
+**[Screencast demonstration of Proxy SSO Plugin User Interaction](http://marketing.masteragenda.com/screencasts/Q2A_proxy_sso_demo/index.html)** 
 
 Note that the screencast is large, and may take several minutes to load. Thank you.
 
@@ -27,17 +27,17 @@ Note that the screencast is large, and may take several minutes to load. Thank y
 * Installation speed: Only one new web method needs to be written on the *authentication website.*
 
 ## Limitations 
-The Q2A and authentication websites must have the same core domain name. Eg q2a.example.com and app.example.com. Or q2a.example.com and example.com. Or example.com/q2a and app.example.com.
+The Q2A and authentication websites must have the same core domain name. Eg Q2A.example.com and app.example.com. Or Q2A.example.com and example.com. Or example.com/Q2A and app.example.com.
 
-Why: the Proxy SSO works by having the Q2A website *proxy* the session cookies from the browser through the q2a website to the authentication website. Both the q2a and authentication website need to set their cookies to a common domain that both share. See the installation section for more information.
+Why: the Proxy SSO works by having the Q2A website *proxy* the session cookies from the browser through the Q2A website to the authentication website. Both the Q2A and authentication website need to set their cookies to a common domain that both share. See the installation section for more information.
 
 The authentication website must use session cookies for determining who is the currently logged on user. Cookies sent as get parameters won't work.
 
 ## Installation
 
-You will install the software on your q2a system, modify your authentication system, and then configure and test.
+You will install the software on your Q2A system, modify your authentication system, and then configure and test.
 
-Watch the [**Installation Screencast**](http://marketing.masteragenda.com/screencasts/q2a_proxy_sso_install/index.html) Note that the screencast is large and may take several minutes to download and start.
+Watch the [**Installation Screencast**](http://marketing.masteragenda.com/screencasts/Q2A_proxy_sso_install/index.html) Note that this is a **different screencast** than the one listed above. The screencast is large and may take several minutes to download and start.
 
 ### Question 2 Answer Installation
 
@@ -57,11 +57,11 @@ Watch the [**Installation Screencast**](http://marketing.masteragenda.com/screen
 
 ### Add an SSO url to your authentication website
 
-You will modify your authentication website to respond to a GET request from Q2A asking if a user is currently logged in or not. Any url can be used. Eg app.domain.com/q2a_sso
+You will modify your authentication website to respond to a GET request from Q2A asking if a user is currently logged in or not. Any url can be used. Eg app.domain.com/Q2A_sso
 
 The "sso url" will not be visible to end users. It responds with a JSON structure, not with an HTML page.
 
-The sso url will be called frequently and should respond quickly. It will be called with any cookies that share a common cookie domain with the q2a installation.
+The sso url will be called frequently and should respond quickly. It will be called with any cookies that share a common cookie domain with the Q2A installation.
 
 **If no one is logged in via the supplied cookies:** the sso url should return an empty HTTP body with 200 status.
 
@@ -73,7 +73,7 @@ The sso url will be called frequently and should respond quickly. It will be cal
 Note The following are only used the first time a given user logs into Q2A via the authentication website. They are used to create the new user. Therefore, if they are changed for a given user later on, Q2A will not pay attention to the change.
 
 * email      *Required.* User's email
-* handle     *Required.* A proposed handle for the user. If it is already taken by someone else in the q2a system, then it will be modified to be unique. The user can then further change it as desired in the account profile page. If your system does not use handles, then you must create one for the user. Eg Initials; First name and initial from last name.
+* handle     *Required.* A proposed handle for the user. If it is already taken by someone else in the Q2A system, then it will be modified to be unique. The user can then further change it as desired in the account profile page. If your system does not use handles, then you must create one for the user. Eg Initials; First name and initial from last name.
 * confirmed  *Required.* Boolean. Has the email been verified to belong to the user?
 * name       *Required.* Full name of the user. Not publicly shown.
 * location   *Optional.*
@@ -93,7 +93,7 @@ The signin link will also have a query parameter **redirect**. Use the parameter
 
 Signout is handled in the same way. While the redirect query parameter will also be supplied on signout requests, it is not as essential as for signin.
 
-**Signout cookie destruction.** Your authentication site's signout method must also be modified to delete or clear the q2a cookies named **qa_session** and **qa_php_session** in the common cookie domain.
+**Signout cookie destruction.** Your authentication site's signout method must also be modified to delete or clear the Q2A cookies named **qa_session** and **qa_php_session** in the common cookie domain.
 
 ### Common cookie domain: Q2A and your authentication application
 
@@ -126,7 +126,7 @@ Congratulations! You're now ready to configure the Proxy SSO plugin via your Q2A
 You can configure your Q2A site so that users will only have access to Q2A via your authentication application:
 
 1. Sign into Q2A via your authentication app. Then sign out. This ensures that you now have a user record in Q2A via SSO.
-2. Sign into Q2A as a super administrator via built-in authentication. Open the user record tthat you created in step 1 and upgrade it to be a super administrator account. Sign out.
+2. Sign into Q2A as a super administrator via built-in authentication. Open the user record that you created in step 1 and upgrade it to be a super administrator account. Sign out.
 3. Sign in again via your authentication app and check that you're a super admin.
 4. Change your qa-config file, set `define ('QA_ENABLE_REG_AUTH', false);`
 
