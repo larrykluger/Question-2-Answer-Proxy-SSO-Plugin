@@ -33,9 +33,11 @@ The authentication website must use session cookies for determining who is the c
 
 You will install the software on your q2a system, modify your authentication system, and then configure and test.
 
+Watch the [**Installation Screencast**](http://marketing.masteragenda.com/screencasts/q2a_proxy_sso_install/index.html) Note that the screencast is large and may take several minutes to download and start.
+
 ### Question 2 Answer Installation
 
-1. Copy the qa-plugin/proxy-sso-login to your installation's qa-plugin directory.
+1. Download the project from github by using the "Downloads" button. Copy the qa-plugin/proxy-sso-login to your installation's qa-plugin directory.
 
 2. qa-include patches: Several core Q2A files need to be patched to enable the plugin. Copy/over-write the files in qa-include to your Q2A installation. 
 
@@ -74,6 +76,69 @@ Note The following are only used the first time a given user logs into Q2A via t
 * website    *Optional.*
 * about      *Optional.* A description.
 * avatar     *Optional.* Complete url of a photo or avatar for the user.
+
+Test your sso url that it works correctly. You can test it from a browser and view the output. To test that the sso url is correctly returning no data when no one is logged in, you may need to use Fiddler or a similar HTTP debug tool.
+
+### Signin and Signout urls on the authentication website
+
+Users pressing the "Login" link on Q2A will be directed to your authentication website's signin page. It can be your usual signin page or a special landing page you create for the Q2A users. As you saw in the Installation screencast, you can add query variables to your usual signin url when the user has arrived via Q2A.
+
+As shown in the screencast, this enables your signin page to specifically welcome your Q2A user.
+
+The signin link will also have a query parameter **redirect**. Use the parameter to redirect the user after a successful login.
+
+Signout is handled in the same way. While the redirect query parameter will also be supplied on signout requests, it is not as essential as for signin.
+
+**Signout cookie destruction.** Your authentication site's signout method must also be modified to delete or clear the q2a cookies named **qa_session** and **qa_php_session** in the common cookie domain.
+
+### Common cookie domain: Q2A and your authentication application
+
+For the Proxy SSO plugin to work, both your Q2A and application domain have to use the exact same cookie domain. 
+
+By default, applications' cookie domain is usually the same as their domain name. So an application at www.foo.com will usually use cookie domain of www.foo.com. Note that cookie domains usually start with a period, so the actual cookie domain would be .www.foo.com
+
+**Determine your common cookie domain** It should be your domain name without any subdomains. Eg foo.com, foo.org.il, foo.info, etc. 
+
+**Modify your authentication website to use the common cookie domain** The process will depend on your application and its web framework. In particular, check that the common cookie domain is used both when your application is accessed via www.foo.com and via foo.com
+
+**Modify Q2A to use the common cookie domain** Change your setting for QA_COOKIE_DOMAIN in your qa-config.php file. Do not include the leading period. Eg
+
+          define('QA_COOKIE_DOMAIN', 'foo.com');
+
+**Check that Q2A and your authentication website are using the same common cookie domain** I suggest using the [Firecookie](https://addons.mozilla.org/en-US/firefox/addon/6683/) plugin for Firebug on Firefox.
+
+### Configure the Proxy SSO Plugin on Q2A
+
+Congratulations! You're now ready to configure the Proxy SSO plugin via your Q2A installation.
+
+* QA_EXTERNAL_USERS in your config file should be set to false.
+* Sign in to Q2A as a Super Administrator
+* Click the plugins tab and configure the plugin per the instructions and the screencast.
+* Test out signing in and out of Q2A via your authentication website.
+* If you're signed into your authentication website and then go to your Q2A website, you should already be signed into the Q2A application.
+
+### Optional: Disable Q2A's Built-in user authentication support
+
+You can configure your Q2A site so that users will only have access to Q2A via your authentication application:
+
+1. Sign into Q2A via your authentication app. Then sign out. This ensures that you now have a user record in Q2A via SSO.
+2. Sign into Q2A as a super administrator via built-in authentication. Open the user record tthat you created in step 1 and upgrade it to be a super administrator account. Sign out.
+3. Sign in again via your authentication app and check that you're a super admin.
+4. Change your qa-config file, set `define ('QA_ENABLE_REG_AUTH', false);`
+
+## Questions?
+
+Use the [Question2Answer Q&A site](http://www.question2answer.org/qa/)
+
+## Credits
+
+* Gideon Greenspan for Question2Answer
+* Tim Gunter for the [Vanilla Forums Proxyconnect plugin.](http://vanillaforums.org/addon/472/proxyconnect) This plugin is based on the Vanilla Forums plugin.
+
+## License 
+
+GPL v2
+
 
 
 
