@@ -41,10 +41,8 @@ You will install the software on your q2a system, modify your authentication sys
 
 3. css patch: copy the qa-theme/Default/qa-styles.css file to your installation. If you've already modified your css file, then just add the following new rules for the new "flash" div:
 
-    .qa-flash {background:#efe; border:1px solid #090; color:#090; font-size:16px;
-               padding:6px; text-align:center; margin-bottom: 10px; width: 80%;
-               font-weight: bold;}
-    .qa-flash p {color:#090; font-size:12px; font-weight: normal; text-align:center;
-                 margin-top: 6px;}
+          .qa-flash {background:#efe; border:1px solid #090; color:#090; font-size:16px;
+                     padding:6px; text-align:center; margin-bottom: 10px; width: 80%; font-weight: bold;}
+          .qa-flash p {color:#090; font-size:12px; font-weight: normal; text-align:center; margin-top: 6px;}
 
 sss
