@@ -4,7 +4,7 @@ This project is the **Proxy SSO Plugin** for the [Question 2 Answer](http://www.
 
 **Tested with Question 2 Answer ver. 1.3**
 
-**[Screencast demonstration of Proxy SSO Plugin User Interaction](http://marketing.masteragenda.com/screencasts/Q2A_proxy_sso_demo/index.html)** 
+**[Screencast demonstration of Proxy SSO Plugin User Interaction](http://marketing.masteragenda.com/screencasts/q2a_proxy_sso_demo/index.html)** 
 
 Note that the screencast is large, and may take several minutes to load. Thank you.
 
@@ -16,7 +16,7 @@ Question 2 Answer (Q2A) includes multiple user authentication techniques. Some c
 * *Facebook Connect Plugin.* Q2A includes a plugin that will authenticate the user with Facebook using the Facebook connect technology. Facebook Connect can be used with the built-in authentication support.
 * The *Proxy SSO Plugin* (this project) enables an external *authentication website* to manage the user registration and signin functions for Q2A.
 
-**[Screencast demonstration of Proxy SSO Plugin User Interaction](http://marketing.masteragenda.com/screencasts/Q2A_proxy_sso_demo/index.html)** 
+**[Screencast demonstration of Proxy SSO Plugin User Interaction](http://marketing.masteragenda.com/screencasts/q2a_proxy_sso_demo/index.html)** 
 
 Note that the screencast is large, and may take several minutes to load. Thank you.
 
@@ -37,7 +37,7 @@ The authentication website must use session cookies for determining who is the c
 
 You will install the software on your Q2A system, modify your authentication system, and then configure and test.
 
-Watch the [**Installation Screencast**](http://marketing.masteragenda.com/screencasts/Q2A_proxy_sso_install/index.html) Note that this is a **different screencast** than the one listed above. The screencast is large and may take several minutes to download and start.
+Watch the [**Installation Screencast**](http://marketing.masteragenda.com/screencasts/q2a_proxy_sso_install/index.html) Note that this is a **different screencast** than the one listed above. The screencast is large and may take several minutes to download and start.
 
 ### Question 2 Answer Installation
 
