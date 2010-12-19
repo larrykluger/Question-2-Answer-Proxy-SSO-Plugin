@@ -259,7 +259,7 @@
 						'label' => 'SSO URL:',
 						'value' => qa_html(qa_opt('proxy_sso_url')),
 						'tags' => 'NAME="proxy_sso_url"',
-						'note' => 'Full url (include http://) that will return a JSON object/associative array if the user is logged in. See <a href="http://google.com" target="_blank">docs.</a>'
+						'note' => 'Full url (include http://) that will return a JSON object/associative array if the user is logged in. See <a href="https://github.com/larrykluger/Question-2-Answer-Proxy-SSO-Plugin" target="_blank">docs.</a>'
 					),
 
 					array(
