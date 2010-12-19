@@ -45,4 +45,35 @@ You will install the software on your q2a system, modify your authentication sys
                      padding:6px; text-align:center; margin-bottom: 10px; width: 80%; font-weight: bold;}
           .qa-flash p {color:#090; font-size:12px; font-weight: normal; text-align:center; margin-top: 6px;}
 
-sss
+4. qa-config changes. See the qa-config-example.php file for new parameters QA_COOKIE_DOMAIN, QA_ENABLE_REG_AUTH, and QA_PROXY_SSO_DEBUG.
+
+5. QA_EXTERNAL_USERS in your config file should be set to false.
+
+### Add an SSO url to your authentication website
+
+You will modify your authentication website to respond to a GET request from Q2A asking if a user is currently logged in or not. Any url can be used. Eg app.domain.com/q2a_sso
+
+The "sso url" will not be visible to end users. It responds with a JSON structure, not with an HTML page.
+
+The sso url will be called frequently and should respond quickly. It will be called with any cookies that share a common cookie domain with the q2a installation.
+
+**If no one is logged in via the supplied cookies:** the sso url should return an empty HTTP body with 200 status.
+
+**If someone is logged in via the supplied cookies:** the sso url should return a JSON structure with the following keys:
+
+* id *Required.* An id for the user that is unique in the sister application. Can be a number or a string. 
+* fname *Optional.* First name. Used for "Welcome back Larry!" message
+
+Note The following are only used the first time a given user logs into Q2A via the authentication website. They are used to create the new user. Therefore, if they are changed for a given user later on, Q2A will not pay attention to the change.
+
+* email      *Required.* User's email
+* handle     *Required.* A proposed handle for the user. If it is already taken by someone else in the q2a system, then it will be modified to be unique. The user can then further change it as desired in the account profile page. If your system does not use handles, then you must create one for the user. Eg Initials; First name and initial from last name.
+* confirmed  *Required.* Boolean. Has the email been verified to belong to the user?
+* name       *Required.* Full name of the user. Not publicly shown.
+* location   *Optional.*
+* website    *Optional.*
+* about      *Optional.* A description.
+* avatar     *Optional.* Complete url of a photo or avatar for the user.
+
+
+
