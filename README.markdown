@@ -4,6 +4,10 @@ This project is the **Proxy SSO Plugin** for the [Question 2 Answer](http://www.
 
 **Tested with Question 2 Answer ver. 1.3**
 
+**[Screencast demonstration of Proxy SSO Plugin User Interaction](http://marketing.masteragenda.com/screencasts/q2a_proxy_sso_demo/index.html)** 
+
+Note that the screencast is large, and may take several minutes to load. Thank you.
+
 ## Multiple Authentication Methods for Question 2 Answer
 Question 2 Answer (Q2A) includes multiple user authentication techniques. Some can be used together:
 
