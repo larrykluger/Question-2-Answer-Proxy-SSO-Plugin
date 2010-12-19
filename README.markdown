@@ -2,7 +2,7 @@
 
 This project is the **Proxy SSO Plugin** for the [Question 2 Answer](http://www.question2answer.org) project. Question 2 Answer is a StackOverflow clone.
 
-**Plugin ver 1.0 tested with Q2A ver. 1.3**
+**Plugin ver 1.3.2 tested with Q2A ver. 1.3**
 
 Use the Switch Tags link (above) to choose a version.
 
