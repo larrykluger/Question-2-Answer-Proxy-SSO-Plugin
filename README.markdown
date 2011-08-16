@@ -140,11 +140,11 @@ You can configure your Q2A site so that users will only have access to Q2A via y
 1. Sign into Q2A via your authentication app. Then sign out. This ensures that you now have a user record in Q2A via SSO.
 2. Sign into Q2A as a super administrator via built-in authentication. Open the user record that you created in step 1 and upgrade it to be a super administrator account. Sign out.
 3. Sign in again via your authentication app and check that you're a super admin.
-4.   Make the regular "Login" and "Register" links invisible:
-    Add to your css file:
-          .qa-nav-user-list .qa-nav-user-login, .qa-nav-user-list .qa-nav-user-register {display:none;}
-    NB. The default css file is qa-theme/Default/qa-styles.css
-    NB. If you later find yourself needing to login to your Q2A site directly, the url is ...question2answer/index.php?qa=login
+4. Make the regular "Login" and "Register" links invisible:
+   * Add to your css file:
+>          .qa-nav-user-list .qa-nav-user-login, .qa-nav-user-list .qa-nav-user-register {display:none;}
+   * NB. The default css file is qa-theme/Default/qa-styles.css
+   * NB. If you later find yourself needing to login to your Q2A site directly, the url is ...question2answer/index.php?qa=login
 5. Disable any new registrations through the built-in system:
 As an administrator, go to the Admin page. Use the **Spam** tab
   Turn ON the option "Temporarily suspend new user registrations"
