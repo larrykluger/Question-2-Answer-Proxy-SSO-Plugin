@@ -59,13 +59,13 @@ Your default css file is in qa-theme/Default/qa-styles.css
 QA_EXTERNAL_USERS in your config file must be set to false.
 
 5. Add the widget.
-* Login to question2answer as a Super Administrator. Goto the **Admin** page.
-* Choose the **Layout** tab. Near the bottom of the page, find the **Proxy SSO Greeting** widget. Click "add widget."
-* Choose Position: Main area - Top.
-* Click "Show widget in this position on all available pages"
-* Click "Add Widget"
-* You are now back on the **Layout** tab's screen
-* Click "Save options"
+    * Login to question2answer as a Super Administrator. Goto the **Admin** page.
+    * Choose the **Layout** tab. Near the bottom of the page, find the **Proxy SSO Greeting** widget. Click "add widget."
+    * Choose Position: Main area - Top.
+    * Click "Show widget in this position on all available pages"
+    * Click "Add Widget"
+    * You are now back on the **Layout** tab's screen
+    * Click "Save options"
 
 ### Add an SSO url to your authentication website
 
