@@ -1,14 +1,14 @@
 <?php
 	
 /*
-	Question2Answer 1.3 (c) 2010, Gideon Greenspan
+	Question2Answer 1.4.1 (c) 2011, Gideon Greenspan
 
 	http://www.question2answer.org/
 
 	
 	File: qa-include/qa-page-account.php
-	Version: 1.3
-	Date: 2010-11-23 06:34:00 GMT
+	Version: 1.4.1
+	Date: 2011-07-10 06:58:57 GMT
 	Description: Controller for user account page
 
 
@@ -39,7 +39,7 @@
 	
 //	Check we're not using single-sign on integration, that we're logged in, and we're not blocked
 	
-	if (QA_EXTERNAL_USERS)
+	if (QA_FINAL_EXTERNAL_USERS)
 		qa_fatal_error('User accounts are handled by external code');
 		
 	if (!isset($qa_login_userid))
@@ -54,12 +54,14 @@
 	
 //	Get current information on user
 
-	list($useraccount, $userprofile, $userfields)=qa_db_select_with_pending(
+	list($useraccount, $userprofile, $userpoints, $userfields)=qa_db_select_with_pending(
 		qa_db_user_account_selectspec($qa_login_userid, true),
 		qa_db_user_profile_selectspec($qa_login_userid, true),
+		qa_db_user_points_selectspec($qa_login_userid, true),
 		qa_db_userfields_selectspec()
 	);
 	
+	$changehandle=qa_opt('allow_change_usernames') || ((!$userpoints['qposts']) && (!$userpoints['aposts']) && (!$userpoints['cposts']));
 	$doconfirms=qa_opt('confirm_user_emails') && ($useraccount['level']<QA_USER_LEVEL_EXPERT);
 	$isconfirmed=($useraccount['flags'] & QA_USER_FLAGS_EMAIL_CONFIRMED) ? true : false;
 	$haspassword=isset($useraccount['passsalt']) && isset($useraccount['passcheck']);
@@ -70,8 +72,9 @@
 	if (qa_clicked('dosaveprofile')) {
 		require_once QA_INCLUDE_DIR.'qa-app-users-edit.php';
 		
-		$inhandle=qa_post_text('handle');
+		$inhandle=$changehandle ? qa_post_text('handle') : $useraccount['handle'];
 		$inemail=qa_post_text('email');
+		$inmessages=qa_post_text('messages');
 		$inavatar=qa_post_text('avatar');
 		
 		$errors=qa_handle_email_validate($inhandle, $inemail, $qa_login_userid);
@@ -89,12 +92,35 @@
 					qa_send_new_confirm($qa_login_userid);
 			}
 			
+		qa_db_user_set_flag($qa_login_userid, QA_USER_FLAGS_NO_MESSAGES, !$inmessages);
 		qa_db_user_set_flag($qa_login_userid, QA_USER_FLAGS_SHOW_AVATAR, ($inavatar=='uploaded'));
 		qa_db_user_set_flag($qa_login_userid, QA_USER_FLAGS_SHOW_GRAVATAR, ($inavatar=='gravatar'));
 
-		if (is_array(@$_FILES['file']) && $_FILES['file']['size'])
-			if (!qa_set_user_avatar($qa_login_userid, file_get_contents($_FILES['file']['tmp_name']), $useraccount['avatarblobid']))
-				$errors['avatar']=qa_lang_sub('users/avatar_not_read', implode(', ', qa_gd_image_formats()));
+		if (is_array(@$_FILES['file']) && $_FILES['file']['size']) {
+			require_once QA_INCLUDE_DIR.'qa-app-limits.php';
+			
+			switch (qa_user_permit_error(null, 'U'))
+			{
+				case 'limit':
+					$errors['avatar']=qa_lang('main/upload_limit');
+					break;
+				
+				default:
+					$errors['avatar']=qa_lang('users/no_permission');
+					break;
+					
+				case false:
+					qa_limits_increment($qa_login_userid, 'U');
+					
+					$toobig=qa_image_file_too_big($_FILES['file']['tmp_name'], qa_opt('avatar_store_size'));
+					
+					if ($toobig)
+						$errors['avatar']=qa_lang_sub('main/image_too_big_x_pc', (int)($toobig*100));
+					elseif (!qa_set_user_avatar($qa_login_userid, file_get_contents($_FILES['file']['tmp_name']), $useraccount['avatarblobid']))
+						$errors['avatar']=qa_lang_sub('main/image_not_read', implode(', ', qa_gd_image_formats()));
+					break;
+			}
+		}
 
 		$infield=array();
 		foreach ($userfields as $userfield) {
@@ -108,13 +134,15 @@
 				qa_db_user_profile_set($qa_login_userid, $userfield['title'], $fieldvalue);
 		}
 		
-		if (empty($errors))
-			qa_redirect('account', array('state' => 'profile-saved'));
-
 		list($useraccount, $userprofile)=qa_db_select_with_pending(
 			qa_db_user_account_selectspec($qa_login_userid, true),
 			qa_db_user_profile_selectspec($qa_login_userid, true)
 		);
+
+		qa_report_event('u_save', $qa_login_userid, $useraccount['handle'], $qa_cookieid);
+		
+		if (empty($errors))
+			qa_redirect('account', array('state' => 'profile-saved'));
 
 		qa_logged_in_user_flush();
 	}
@@ -141,7 +169,11 @@
 			
 		if (empty($errors)) {
 			qa_db_user_set_password($qa_login_userid, $innewpassword1);
-			unset($inoldpassword);
+			qa_db_user_set($qa_login_userid, 'sessioncode', ''); // stop old 'Remember me' style logins from still working
+			qa_set_logged_in_user($qa_login_userid, $useraccount['handle'], false, $useraccount['sessionsource']); // reinstate this specific session
+
+			qa_report_event('u_password', $qa_login_userid, $useraccount['handle'], $qa_cookieid);
+		
 			qa_redirect('account', array('state' => 'password-changed'));
 		}
 	}
@@ -153,8 +185,8 @@
 
 	$qa_content['title']=qa_lang_html('profile/my_account_title');
 	
-	$qa_content['form']=array(
-		'tags' => ' ENCTYPE="multipart/form-data" METHOD="POST" ACTION="'.qa_self_html().'" ',
+	$qa_content['form_profile']=array(
+		'tags' => 'ENCTYPE="multipart/form-data" METHOD="POST" ACTION="'.qa_self_html().'"',
 		
 		'style' => 'wide',
 		
@@ -173,17 +205,26 @@
 			
 			'handle' => array(
 				'label' => qa_lang_html('users/handle_label'),
-				'tags' => ' NAME="handle" ',
+				'tags' => 'NAME="handle"',
 				'value' => qa_html(isset($inhandle) ? $inhandle : $useraccount['handle']),
 				'error' => qa_html(@$errors['handle']),
+				'type' => $changehandle ? 'text' : 'static',
 			),
 			
 			'email' => array(
 				'label' => qa_lang_html('users/email_label'),
-				'tags' => ' NAME="email" ',
+				'tags' => 'NAME="email"',
 				'value' => qa_html(isset($inemail) ? $inemail : $useraccount['email']),
 				'error' => isset($errors['email']) ? qa_html($errors['email']) :
 					(($doconfirms && !$isconfirmed) ? qa_insert_login_links(qa_lang_html('users/email_please_confirm')) : null),
+			),
+			
+			'messages' => array(
+				'label' => qa_lang_html('users/private_messages'),
+				'tags' => 'NAME="messages"',
+				'type' => 'checkbox',
+				'value' => !($useraccount['flags'] & QA_USER_FLAGS_NO_MESSAGES),
+				'note' => qa_lang_html('users/private_messages_explanation'),
 			),
 			
 			'avatar' => null, // for positioning
@@ -201,7 +242,10 @@
 	);
 	
 	if ($qa_state=='profile-saved')
-		$qa_content['form']['ok']=qa_lang_html('users/profile_saved');
+		$qa_content['form_profile']['ok']=qa_lang_html('users/profile_saved');
+	
+	if (!qa_opt('allow_private_messages'))
+		unset($qa_content['form_profile']['fields']['messages']);
 		
 
 //	Avatar upload stuff
@@ -241,17 +285,17 @@
 				$avatarvalue=$avataroptions['uploaded'];
 		}
 		
-		$qa_content['form']['fields']['avatar']=array(
+		$qa_content['form_profile']['fields']['avatar']=array(
 			'type' => 'select-radio',
 			'label' => qa_lang_html('users/avatar_label'),
-			'tags' => ' NAME="avatar" ',
+			'tags' => 'NAME="avatar"',
 			'options' => $avataroptions,
 			'value' => $avatarvalue,
 			'error' => qa_html(@$errors['avatar']),
 		);
 		
 	} else
-		unset($qa_content['form']['fields']['avatar']);
+		unset($qa_content['form_profile']['fields']['avatar']);
 
 
 //	Other profile fields
@@ -267,9 +311,9 @@
 		if (strlen($label))
 			$label.=':';
 			
-		$qa_content['form']['fields'][$userfield['title']]=array(
+		$qa_content['form_profile']['fields'][$userfield['title']]=array(
 			'label' => qa_html($label),
-			'tags' => ' NAME="'.$fieldname.'" ',
+			'tags' => 'NAME="'.$fieldname.'"',
 			'value' => qa_html($value),
 			'error' => qa_html(@$errors[$fieldname]),
 			'rows' => ($userfield['flags'] & QA_FIELD_FLAGS_MULTI_LINE) ? 8 : null,
@@ -278,57 +322,58 @@
 	
 
 //	Change password form
-  if (QA_ENABLE_REG_AUTH) 
-  {
-    $qa_content['form_2']=array(
-	  	'tags' => ' METHOD="POST" ACTION="'.qa_self_html().'" ',
-	  	
-	  	'style' => 'wide',
-	  	
-	  	'title' => qa_lang_html('users/change_password'),
-	  	
-	  	'fields' => array(
-	  		'old' => array(
-	  			'label' => qa_lang_html('users/old_password'),
-	  			'tags' => ' NAME="oldpassword" ',
-	  			'value' => qa_html(@$inoldpassword),
-	  			'type' => 'password',
-	  			'error' => @$errors['oldpassword'],
-	  		),
-	  	
-	  		'new_1' => array(
-	  			'label' => qa_lang_html('users/new_password_1'),
-	  			'tags' => ' NAME="newpassword1" ',
-	  			'type' => 'password',
-	  			'error' => @$errors['password'],
-	  		),
-    
-	  		'new_2' => array(
-	  			'label' => qa_lang_html('users/new_password_2'),
-	  			'tags' => ' NAME="newpassword2" ',
-	  			'type' => 'password',
-	  			'error' => @$errors['newpassword2'],
-	  		),
-	  	),
-	  	
-	  	'buttons' => array(
-	  		'change' => array(
-	  			'label' => qa_lang_html('users/change_password'),
-	  		),
-	  	),
-	  	
-	  	'hidden' => array(
-	  		'dochangepassword' => '1',
-	  	),
-	  );
+  // only show password form if the user "source" is null
+  $source = qa_get_logged_in_user_field('sessionsource');
+	if (strlen ($source)==0) {
+	$qa_content['form_password']=array(
+		'tags' => 'METHOD="POST" ACTION="'.qa_self_html().'"',
+		
+		'style' => 'wide',
+		
+		'title' => qa_lang_html('users/change_password'),
+		
+		'fields' => array(
+			'old' => array(
+				'label' => qa_lang_html('users/old_password'),
+				'tags' => 'NAME="oldpassword"',
+				'value' => qa_html(@$inoldpassword),
+				'type' => 'password',
+				'error' => @$errors['oldpassword'],
+			),
+		
+			'new_1' => array(
+				'label' => qa_lang_html('users/new_password_1'),
+				'tags' => 'NAME="newpassword1"',
+				'type' => 'password',
+				'error' => @$errors['password'],
+			),
+
+			'new_2' => array(
+				'label' => qa_lang_html('users/new_password_2'),
+				'tags' => 'NAME="newpassword2"',
+				'type' => 'password',
+				'error' => @$errors['newpassword2'],
+			),
+		),
+		
+		'buttons' => array(
+			'change' => array(
+				'label' => qa_lang_html('users/change_password'),
+			),
+		),
+		
+		'hidden' => array(
+			'dochangepassword' => '1',
+		),
+	);
 	
-	  if (!$haspassword) {
-	  	$qa_content['form_2']['fields']['old']['type']='static';
-	  	$qa_content['form_2']['fields']['old']['value']=qa_lang_html('users/password_none');
-	  }
-	  
-	  if ($qa_state=='password-changed')
-	  	$qa_content['form']['ok']=qa_lang_html('users/password_changed');
+	if (!$haspassword) {
+		$qa_content['form_password']['fields']['old']['type']='static';
+		$qa_content['form_password']['fields']['old']['value']=qa_lang_html('users/password_none');
+	}
+	
+	if ($qa_state=='password-changed')
+		$qa_content['form_profile']['ok']=qa_lang_html('users/password_changed');
   }
 		
 	return $qa_content;

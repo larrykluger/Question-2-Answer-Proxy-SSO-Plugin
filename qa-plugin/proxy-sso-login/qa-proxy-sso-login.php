@@ -4,8 +4,8 @@
   Proxy SSO login plugin (c) 2010, Larry Kluger
 
 	File: qa-plugin/proxy-sso-login/qa-proxy-sso-login.php
-	Version: 1
-	Date: 2010-12-10 06:34:00 GMT
+	Version: 1.4.x
+	Date: 2011-8-15
 	Description: Login module class for Proxy SSO login plugin
 
 	This program is free software; you can redistribute it and/or
@@ -22,7 +22,8 @@
 
   See README for more info
 */
-
+  
+  require_once QA_INCLUDE_DIR.'qa-db-users.php';
 	class qa_proxy_sso_login {
 	  
 	  /* This plugin enables q2a to have Single Sign On (SSO) with a sister app.
@@ -97,6 +98,9 @@
 	  
 	  =========================================================================================
 	  =========================================================================================	  
+    REF
+      http://www.question2answer.org/plugins.php
+
 	  DEBUGGING
 	  
 	  To see the messages that are being received from the remove server via the proxy_sso_url:
@@ -141,7 +145,7 @@
       try {
         $raw_data = $this->proxy_request($url);
       } catch (Exception $e) {
-          qa_set_flash('Oops! We had a problem contacting the Single Sign-on server ' . $url . '. Please try again or contact support if the problem continues. Thank you.');
+          $this->set_flash('Oops! We had a problem contacting the Single Sign-on server ' . $url . '. Please try again or contact support if the problem continues. Thank you.');
           error_log("ERROR, qa-proxy-sso-login when contacting " . $url . ' -- ' . $e->getMessage());
       }
       if (defined('QA_PROXY_SSO_DEBUG') && QA_PROXY_SSO_DEBUG)
@@ -153,7 +157,7 @@
       if (substr($raw_data, 0, 1) !== '{') {
         // Problem, JSON was not returned. Either a temp network error or a more
         // substantive editor with the proxy_sso_url function
-        qa_set_flash('Oops! We had a problem contacting the Single Sign-on server ' . $url . '. Please try again or contact support if the problem continues. Thank you.');
+        $this->set_flash('Oops! We had a problem contacting the Single Sign-on server ' . $url . '. Please try again or contact support if the problem continues. Thank you.');
         error_log("ERROR, qa-proxy-sso-login when contacting " . $url . ' -- ' . print_r($raw_data, true));
       } else {
         // Decode the data and log the person in. If first time, then a new user will be created 
@@ -164,24 +168,37 @@
 			  
 			  if (is_array($user)) {
 			    // qa_log_in_external_user is defined in qa-include/qa-app-users
+			    // Docs for qa_log_in_external_user: http://www.question2answer.org/modules.php
 			    // It will either login a user or create a new user and then log him in.
-			  	list($new_user, $handle) = qa_log_in_external_user($this->source_name, $user['id'], array(
+			    
+			    $source = $this->source_name;
+			    $identifier = $user['id'];
+    			
+    			// See if user is already registered with the q2a system
+    			$users=qa_db_user_login_find($source, $identifier);
+			    $new_user = count($users) == 0;
+			    
+			    // log in our guy. If this is the first time, then the method will create a 
+			    // login in q2a as a side-effect
+			  	qa_log_in_external_user($source, $identifier, array(
 			  		'email' => $user['email'],
-			  		'handle' => $user['handle'],
 			  		'confirmed' => $user['confirmed'],
+			  		'handle' => $user['handle'],
 			  		'name' => $user['name'],
 			  		'location' => @$user['location'],
 			  		'website' => @$user['website'],
 			  		'about' => @$user['about'],
 			  		'avatar' => strlen(@$user['picture']) ? qa_retrieve_url($user['picture']) : null,
 			  	));
+	        
+	        $handle = qa_get_logged_in_handle();
 	        // Set flash welcome msg
 	        // %1$s -- fname
 	        // %2$s -- name
 	        // %3$s -- handle assigned by q2a.
           $template = qa_opt($new_user ? 'proxy_sso_new_user_msg' : 'proxy_sso_welcome_msg');
           if (strlen($template)) 
-			      qa_set_flash(sprintf($template, $user['fname'], $user['name'], $handle));
+			      $this->set_flash(sprintf($template, $user['fname'], $user['name'], $handle));
 			  }
 			}
 		}
@@ -475,10 +492,11 @@ Welcome back %1$s!'
        }
 	 		
        return $Result;
-	 }	
-		
-		
-		
+	 }
+	 
+	 function set_flash($msg) {
+  		  $_SESSION['qa_flash']=$msg;
+   }	
 		
 		
 	};

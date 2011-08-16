@@ -27,14 +27,14 @@
 
 /*
 	Plugin Name: Proxy SSO Login
-	Plugin URI: 
+	Plugin URI: https://github.com/larrykluger/Question-2-Answer-Proxy-SSO-Plugin
 	Plugin Description: Allows users to log in using Q2A as a proxy to their main app
-	Plugin Version: 1.0
-	Plugin Date: 2010-12-11
+	Plugin Version: 2.0
+	Plugin Date: 2011-08-15
 	Plugin Author: Larry Kluger
 	Plugin Author URI: http://www.masteragenda.org/
 	Plugin License: GPLv2
-	Plugin Minimum Question2Answer Version: 1.3
+	Plugin Minimum Question2Answer Version: 1.4
 */
 
 
@@ -45,7 +45,7 @@
 
 
 	qa_register_plugin_module('login', 'qa-proxy-sso-login.php', 'qa_proxy_sso_login', 'Proxy SSO Login');
-	
+	qa_register_plugin_module('widget', 'qa-proxy-sso-login-widget.php', 'qa_proxy_sso_widget', 'Proxy SSO Greeting');	
 
 /*
 	Omit PHP closing tag to help avoid accidental output

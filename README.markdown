@@ -2,7 +2,7 @@
 
 This project is the **Proxy SSO Plugin** for the [Question 2 Answer](http://www.question2answer.org) project. Question 2 Answer is a StackOverflow clone.
 
-**Plugin ver 1.3.2 tested with Q2A ver. 1.3**
+**Plugin ver 1.4 tested with Q2A ver. 1.4**
 
 Use the Switch Tags link (above) to choose a version.
 
@@ -26,7 +26,7 @@ Note that the screencast is large, and may take several minutes to load. Thank y
 
 * Flexibility: The external *authentication website* can be located on the same machine as the Q2A installation or a different machine. 
 * Flexibility: The *authentication website* can be written in a different language and use a different database system than the Q2A site.
-* Installation speed: Only one new web method needs to be written on the *authentication website.*
+* Installation speed: Only two changes are needed on the *authentication website:* A  new web method and updating your service's logout to destroy Question2Answer cookies. 
 
 ## Limitations 
 The Q2A and authentication websites must have the same core domain name. Eg Q2A.example.com and app.example.com. Or Q2A.example.com and example.com. Or example.com/Q2A and app.example.com.
@@ -39,23 +39,32 @@ The authentication website must use session cookies for determining who is the c
 
 You will install the software on your Q2A system, modify your authentication system, and then configure and test.
 
-Watch the [**Installation Screencast**](http://marketing.masteragenda.com/screencasts/q2a_proxy_sso_install/index.html) Note that this is a **different screencast** than the one listed above. The screencast is large and may take several minutes to download and start.
+Watch the [**Installation Screencast**](http://marketing.masteragenda.com/screencasts/q2a_proxy_sso_install/index.html) Note that this is a **different screencast** than the one listed above. The screencast is large and may take several minutes to download and start. The screencast is for the first version of the plugin. Now the installation is even faster.
 
 ### Question 2 Answer Installation
 
 1. Download the project from github by using the "Downloads" button. Copy the qa-plugin/proxy-sso-login to your installation's qa-plugin directory.
 
-2. qa-include patches: Several core Q2A files need to be patched to enable the plugin. Copy/over-write the files in qa-include to your Q2A installation. 
+2. qa-include patches: One core Q2A file needs to be patched to enable the plugin. Copy/over-write the file in the plugin's qa-include directory to your Q2A installation. 
 
-3. css patch: copy the qa-theme/Default/qa-styles.css file to your installation. If you've already modified your css file, then just add the following new rules for the new "flash" div:
+3. css new rules: add the following to your question2answer css file.
+Your default css file is in qa-theme/Default/qa-styles.css
 
           .qa-flash {background:#efe; border:1px solid #090; color:#090; font-size:16px;
                      padding:6px; text-align:center; margin-bottom: 10px; width: 80%; font-weight: bold;}
           .qa-flash p {color:#090; font-size:12px; font-weight: normal; text-align:center; margin-top: 6px;}
+          
 
-4. qa-config changes. See the qa-config-example.php file for new parameters QA_COOKIE_DOMAIN, QA_ENABLE_REG_AUTH, and QA_PROXY_SSO_DEBUG.
+4. qa-config changes. Set QA_COOKIE_DOMAIN as described below.
+QA_EXTERNAL_USERS in your config file must be set to false.
 
-5. QA_EXTERNAL_USERS in your config file should be set to false.
+5. Login to question2answer as a Super Administrator. Goto the **Admin** page.
+Choose the **Layout** tab. Near the bottom of the page, find the **Proxy SSO Greeting** widget. Click "add widget."
+Choose Position: Main area - Top.
+Click "Show widget in this position on all available pages"
+Click "Add Widget"
+You are now back on the **Layout** tab's screen
+Click "Save options"
 
 ### Add an SSO url to your authentication website
 
@@ -95,21 +104,21 @@ The signin link will also have a query parameter **redirect**. Use the parameter
 
 Signout is handled in the same way. While the redirect query parameter will also be supplied on signout requests, it is not as essential as for signin.
 
-**Signout cookie destruction.** Your authentication site's signout method must also be modified to delete or clear the Q2A cookies named **qa_session** and **qa_php_session** in the common cookie domain.
+**Signout cookie destruction.** Your authentication site's signout method must also be modified to delete or clear the Q2A cookies named **PHPSESSID**, **qa_session** and **qa_php_session** in the common cookie domain.
 
 ### Common cookie domain: Q2A and your authentication application
 
 For the Proxy SSO plugin to work, both your Q2A and application domain have to use the exact same cookie domain. 
 
-By default, applications' cookie domain is usually the same as their domain name. So an application at www.foo.com will usually use cookie domain of www.foo.com. Note that cookie domains usually start with a period, so the actual cookie domain would be .www.foo.com
+By default, applications' cookie domains are usually the same as their domain name. So an application at www.foo.com will usually use cookie domain of www.foo.com. Note that cookie domains usually start with a period, so the actual cookie domain would be .www.foo.com
 
 **Determine your common cookie domain** It should be your domain name without any subdomains. Eg foo.com, foo.org.il, foo.info, etc. 
 
 **Modify your authentication website to use the common cookie domain** The process will depend on your application and its web framework. In particular, check that the common cookie domain is used both when your application is accessed via www.foo.com and via foo.com
 
-**Modify Q2A to use the common cookie domain** Change your setting for QA_COOKIE_DOMAIN in your qa-config.php file. Do not include the leading period. Eg
+**Modify Q2A to use the common cookie domain** Change your setting for QA_COOKIE_DOMAIN in your qa-config.php file. Include the leading period. Eg
 
-          define('QA_COOKIE_DOMAIN', 'foo.com');
+          define('QA_COOKIE_DOMAIN', '.foo.com');
 
 **Check that Q2A and your authentication website are using the same common cookie domain** I suggest using the [Firecookie](https://addons.mozilla.org/en-US/firefox/addon/6683/) plugin for Firebug on Firefox.
 
@@ -130,7 +139,15 @@ You can configure your Q2A site so that users will only have access to Q2A via y
 1. Sign into Q2A via your authentication app. Then sign out. This ensures that you now have a user record in Q2A via SSO.
 2. Sign into Q2A as a super administrator via built-in authentication. Open the user record that you created in step 1 and upgrade it to be a super administrator account. Sign out.
 3. Sign in again via your authentication app and check that you're a super admin.
-4. Change your qa-config file, set `define ('QA_ENABLE_REG_AUTH', false);`
+4. Make the regular "Login" and "Register" links invisible:
+Add to your css file:
+          .qa-nav-user-list .qa-nav-user-login, .qa-nav-user-list .qa-nav-user-register {display:none;}
+NB. The default css file is qa-theme/Default/qa-styles.css
+NB. If you later find yourself needing to login to your Q2A site directly, the url is 
+    ...question2answer/index.php?qa=login
+5. Disable any new registrations through the built-in system:
+As an administrator, go to the Admin page. Use the **Spam** tab
+  Turn ON the option "Temporarily suspend new user registrations"
 
 ## Questions?
 
@@ -145,6 +162,7 @@ Use the [Question2Answer Q&A site](http://www.question2answer.org/qa/)
 
 GPL v2
 
-
+## Change log
+For Q2A 1.4.1 compatibility: No longer need most patch files. Added widget to handle the flash messages.
 
 
