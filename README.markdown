@@ -143,7 +143,7 @@ You can configure your Q2A site so that users will only have access to Q2A via y
 4. Remove the regular "Login" and "Register" links
     * Add to your css file:
             .qa-nav-user-list .qa-nav-user-login, .qa-nav-user-list .qa-nav-user-register {display:none;}
-    * NB. The default css file is qa-theme/Default/qa-styles.css
+    * The default css file is qa-theme/Default/qa-styles.css
     * NB. If you later find yourself needing to login to your Q2A site directly, the url is ...question2answer/index.php?qa=login
 5. Disable any new registrations through the built-in system:
     * As an administrator, go to the Admin page.
