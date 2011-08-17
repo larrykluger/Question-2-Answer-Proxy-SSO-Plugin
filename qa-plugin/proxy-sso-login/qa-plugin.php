@@ -45,7 +45,8 @@
 
 
 	qa_register_plugin_module('login', 'qa-proxy-sso-login.php', 'qa_proxy_sso_login', 'Proxy SSO Login');
-	qa_register_plugin_module('widget', 'qa-proxy-sso-login-widget.php', 'qa_proxy_sso_widget', 'Proxy SSO Greeting');	
+	qa_register_plugin_module('widget', 'qa-proxy-sso-login-widget.php', 'qa_proxy_sso_widget', 'Proxy SSO Greeting');
+	qa_register_plugin_layer('qa-proxy-sso-login-layer.php', 'Proxy SSO Password fix');
 
 /*
 	Omit PHP closing tag to help avoid accidental output
