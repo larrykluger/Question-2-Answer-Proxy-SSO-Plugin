@@ -45,18 +45,10 @@ Watch the [**Installation Screencast**](http://marketing.masteragenda.com/screen
 
 1. Download the project from github by using the "Downloads" button. Copy the qa-plugin/proxy-sso-login to your installation's qa-plugin directory.
 
-2. css new rules: add the following to your question2answer css file.
-Your default css file is in qa-theme/Default/qa-styles.css
-
-          .qa-flash {background:#efe; border:1px solid #090; color:#090; font-size:16px;
-                     padding:6px; text-align:center; margin-bottom: 10px; width: 80%; font-weight: bold;}
-          .qa-flash p {color:#090; font-size:12px; font-weight: normal; text-align:center; margin-top: 6px;}
-          
-
-3. qa-config changes. Set QA_COOKIE_DOMAIN as described below.
+2. qa-config changes. Set QA_COOKIE_DOMAIN as described below.
 QA_EXTERNAL_USERS in your config file must be set to false.
 
-4. Add the widget.
+3. Add the widget.
     * Login to question2answer as a Super Administrator. Goto the **Admin** page.
     * Choose the **Layout** tab. Near the bottom of the page, find the **Proxy SSO Greeting** widget. Click "add widget."
     * Choose Position: Main area - Top.
@@ -162,6 +154,7 @@ Use the [Question2Answer Q&A site](http://www.question2answer.org/qa/)
 GPL v2
 
 ## Change log
+* Q2A 1.5 includes flash css rule.
 * For Q2A 1.4.1 compatibility: No longer need most patch files. Added widget to handle the flash messages.
 * Plugin v 1.4.1.1: The plugin no longer requires patches to the core q2a software! Thank you Gidi for the pointers.
 
